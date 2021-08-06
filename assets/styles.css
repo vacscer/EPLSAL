@@ -21,24 +21,7 @@ body{
     grid-template-columns: 50% 50%;
 }
 
-.custom_tabs{
-    height: 50px;
-}
-
-.custom-tab {
-    border-bottom: '1px solid #d6d6d6';
-    padding: '6px';
-    font-weight: 'bold';
-}
-.custom-tab--selected {
-    border-Top: '1px solid #d6d6d6';
-    border-Bottom: '1px solid #d6d6d6';
-    background-Color: '#119DFF';
-    color: 'white';
-    padding: '6px';
-}
-
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1000px) {
     .grid{
         grid-template-columns: 100%;
     }
