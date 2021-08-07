@@ -91,26 +91,6 @@ app.layout = html.Div([
         html.H3('Transfer Fee by players and teams on the English Premiere League')
     ]),
     dcc.Tabs(parent_className='custom_tabs',children=[
-        dcc.Tab(label='Filter team', className='custom-tab',
-                selected_className='custom-tab--selected', children=[
-            dcc.Dropdown(
-                id='dropdown',
-                options=[{'label': i, 'value': i} for i in data['team'].unique()],
-                placeholder="Select a team or teams",
-                multi=True,
-            ),
-            html.Div(className='grid', children=[
-                html.Div(className='caja', children=[
-                    dcc.Graph(id='display-tree'),
-                ]),
-                html.Div(className='caja', children=[
-                    dcc.Graph(id='display-two'),
-                ]),
-                html.Div(className='caja', children=[
-                    dcc.Graph(id='display-spyder'),
-                ])
-            ])
-        ]),
         dcc.Tab(label='All teams', className='custom-tab',
                 selected_className='custom-tab--selected', children=[
             html.Div(className='grid', children=[
@@ -138,6 +118,32 @@ app.layout = html.Div([
                 ]),                
             ]),
         ]),
+        dcc.Tab(label='Filter team', className='custom-tab',
+                selected_className='custom-tab--selected', children=[
+            dcc.Dropdown(
+                id='dropdown',
+                options=[{'label': i, 'value': i} for i in data['team'].unique()],
+                placeholder="Select a team or teams",
+                multi=True,
+            ),
+            html.Div(className='grid', children=[
+                html.Div(className='caja', children=[
+                    dcc.Graph(id='display-tree'),
+                ]),
+                html.Div(className='caja', children=[
+                    dcc.Graph(id='display-two'),
+                ]),
+                html.Div(className='caja', children=[
+                    dcc.Graph(id='display-spyder'),
+                ]),
+                html.Div(className='caja', children=[
+                    dcc.Graph(id='display-meanage'),
+                ]),
+                html.Div(className='caja', children=[
+                    dcc.Graph(id='display-facet'),
+                ])
+            ])
+        ]),
     ]),
 ])
 
@@ -146,12 +152,11 @@ app.layout = html.Div([
 def display_value3(value):
     print(value)
     df_sup=data.loc[(data['salary']!=0) & (data['Expires']!=0)]
+    fil_team=df_sup
     if (value != None):
         if (len(value)>0):
         #fil_team=df_sup.loc[df_sup['team']==value]
             fil_team=df_sup.loc[df_sup['team'].isin(value)]
-    else:
-        fil_team=df_sup
     fig = px.treemap(fil_team, path=['Pos.', 'Player Name'], values='salary',
                   color='salary', hover_data=['Age'],
                   color_continuous_scale='RdBu')
@@ -162,10 +167,11 @@ def display_value3(value):
               [dash.dependencies.Input('dropdown', 'value')])
 def display_value2(value):
     df_sup=data.loc[data['Expires']!=0]
+    df_sup['time']= df_sup['time'].astype(int)
     if (value != None):
         if (len(value)>0):
             df_sup=df_sup.loc[df_sup['team'].isin(value)]
-    fig = px.scatter(df_sup, x="Transfer Fee", y="salary", color="team",
+    fig = px.scatter(df_sup, x="Transfer Fee", y="salary", color="team", size='time',
                  hover_data=['Player Name'])
     fig.update_layout(legend=dict(
     orientation="h",
@@ -173,8 +179,10 @@ def display_value2(value):
     y=1.02,
     xanchor="right",
     x=1
-    ))
-
+    ), 
+     paper_bgcolor='rgba(0,0,0,0)',
+    plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_traces(opacity=0.75)
     return fig
 
 @app.callback(Output('display-spyder', 'figure'),
@@ -197,6 +205,42 @@ def display_value4(value):
     fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False)
     return fig
 
+@app.callback(Output('display-meanage', 'figure'),
+              [dash.dependencies.Input('dropdown', 'value')])
+def display_age_mean(value):
+    print(value)
+    df_sup=data.loc[(data['salary']!=0) & (data['Expires']!=0)]
+    if (value != None):
+        if (len(value)>0):
+        #df_sup=df_sup.loc[df_sup['team']==value]
+            df_sup=df_sup.loc[df_sup['team'].isin(value)]
+    edades=df_sup.groupby("Age").count().reset_index()
+    edades['Age']=edades['Age'].astype(str)
+
+    fig = px.histogram(df_sup, x="Age",
+                   marginal="box", # or violin, rug
+                   hover_data=df_sup.columns)
+    return fig
+
+@app.callback(Output('display-facet', 'figure'),
+              [dash.dependencies.Input('dropdown', 'value')])
+def display_facet(value):
+    print(value)
+    df_sup=data.loc[data['Expires']!=0]
+    if (value != None):
+        if (len(value)>0):
+        #df_sup=df_sup.loc[df_sup['team']==value]
+            df_sup=df_sup.loc[df_sup['team'].isin(value)]
+    edades=df_sup.groupby("Age").count().reset_index()
+    edades['Age']=edades['Age'].astype(str)
+    fig = px.bar(df_sup, x="Transfer Fee", y="Player Name",facet_col="Pos.",
+            facet_col_wrap=2,
+            facet_col_spacing=0.19,
+            category_orders={"Pos.": ["GK", "D", "M", "F"]})
+    fig.update_yaxes(matches=None,showticklabels=True)
+    fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False)
+    return fig
+
 @app.callback(
     dash.dependencies.Output('figure5', 'figure'),
     [dash.dependencies.Input('slide-top', 'value')])
@@ -206,6 +250,7 @@ def top_slider(value):
     Player_groups=Player_groups.sort_values('Avg. Salary', ascending=False)
     fig = px.bar(Player_groups.head(value[0]), x="Player Name", y="Avg. Salary")
     return fig
+
 
 
 
