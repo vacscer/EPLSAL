@@ -20,13 +20,19 @@ def display_value():
 
     fig.add_trace(
         go.Box(y=df_sup['salary'],
-            name="Salary",),
+            name="Salary",
+            boxpoints='outliers', # only outliers
+        marker_color='#ff2882',
+        line_color='#963cff'),
         row=1, col=1
     )
 
     fig.add_trace(
         go.Box(y=df_sup['Transfer Fee'],
-            name="Transfer",),
+            name="Transfer",
+            boxpoints='outliers', # only outliers
+        marker_color='#ff2882',
+        line_color='rgb(0,0,0)'),
         row=1, col=2
     )
 
@@ -35,7 +41,7 @@ def display_value():
             name="Years contract",
                 boxpoints='outliers', # only outliers
         marker_color='rgb(107,174,214)',
-        line_color='rgb(0,0,0)'),
+        line_color='#ff2882'),
         row=1, col=3,
     )
 
@@ -60,14 +66,16 @@ def teams_trans():
     df_sup_t=data[['team','Transfer Fee','Pos.']]
     df_sup_t=df_sup_t.groupby(["team",'Pos.'])['Transfer Fee'].sum().reset_index()
     df_sup_t=df_sup_t.sort_values('Transfer Fee', ascending=False)
-    fig = px.bar(df_sup_t, x="team", y="Transfer Fee", color="Pos.")
+    fig = px.bar(df_sup_t, x="team", y="Transfer Fee", color="Pos.",
+                color_discrete_sequence=['#ff2882', 'rgb(0,0,0)','#963cff','#37003c'],)
     return fig
 
 def teams_sal():
     df_sup_t=data[['team','Avg. Salary','Pos.']]
     df_sup_t=df_sup_t.groupby(["team",'Pos.'])['Avg. Salary'].sum().reset_index()
     df_sup_t=df_sup_t.sort_values('Avg. Salary', ascending=False)
-    fig = px.bar(df_sup_t, x="team", y="Avg. Salary", color="Pos.")
+    fig = px.bar(df_sup_t, x="team", y="Avg. Salary", color="Pos.",
+                color_discrete_sequence=['#ff2882', 'rgb(0,0,0)','#963cff','#37003c'])
     return fig
 
 
@@ -157,7 +165,7 @@ def display_value2(value):
     if (value != None):
         if (len(value)>0):
             df_sup=df_sup.loc[df_sup['team'].isin(value)]
-    fig = px.scatter(df_sup, x="Transfer Fee", y="salary", color="team", size="time",
+    fig = px.scatter(df_sup, x="Transfer Fee", y="salary", color="team",
                  hover_data=['Player Name'])
     fig.update_layout(legend=dict(
     orientation="h",

@@ -1,3 +1,6 @@
+.modebar{
+    display: none !important;
+}
 body{
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     
@@ -13,7 +16,8 @@ body{
     text-align: center;
     height: 50px;
     padding-top: 20px;
-    background-color: rgba(241, 147, 23, 0.37);
+    background-color: #37003c;
+    color: white;
 }
 
 .grid{
