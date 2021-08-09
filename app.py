@@ -15,11 +15,11 @@ app = dash.Dash(__name__)
 server = app.server
 
 def display_value():
-    df_sup=data
+    df_sup=data.loc[(data['salary']!=0) & (data['Expires']!=0)]
     fig = make_subplots(rows=1, cols=3)
 
     fig.add_trace(
-        go.Box(y=df_sup['salary'],
+        go.Box(y=df_sup['Avg. Salary'],text=df_sup['Player Name'],
             name="Salary",
             boxpoints='outliers', # only outliers
         marker_color='#ff2882',
@@ -28,7 +28,7 @@ def display_value():
     )
 
     fig.add_trace(
-        go.Box(y=df_sup['Transfer Fee'],
+        go.Box(y=df_sup['Transfer Fee'],text=df_sup['Player Name'],
             name="Transfer",
             boxpoints='outliers', # only outliers
         marker_color='#ff2882',
@@ -37,7 +37,7 @@ def display_value():
     )
 
     fig.add_trace(
-        go.Box(y=df_sup['time'],
+        go.Box(y=df_sup['time'],text=df_sup['Player Name'],
             name="Years contract",
                 boxpoints='outliers', # only outliers
         marker_color='rgb(107,174,214)',
@@ -53,13 +53,19 @@ def display_value3():
     Player_groups=df_sup_t.groupby("Player Name").sum().reset_index()
     Player_groups=Player_groups.sort_values('Transfer Fee', ascending=False)
     fig = px.bar(Player_groups.head(10), x="Player Name", y="Transfer Fee")
+    fig.update_traces(marker_color='#ff2882',
+                  marker_line_width=1.5, opacity=0.6)
+    fig.update_layout(title_text='Top Average transfer fee')
     return fig
 
 def display_value5():
     df_sup_t=data.loc[data['Expires']!=0]
     Player_groups=df_sup_t.groupby("Player Name").sum().reset_index()
     Player_groups=Player_groups.sort_values('Avg. Salary', ascending=False)
-    fig = px.bar(Player_groups.head(10), x="Player Name", y="Avg. Salary")
+    fig = px.bar(Player_groups.head(10), x="Player Name", y="Avg. Salary",)
+    fig.update_traces(marker_color='#ff2882',
+                  marker_line_width=1.5, opacity=0.6)
+    fig.update_layout(title_text='Top Average salary')
     return fig
 
 def teams_trans():
@@ -68,6 +74,7 @@ def teams_trans():
     df_sup_t=df_sup_t.sort_values('Transfer Fee', ascending=False)
     fig = px.bar(df_sup_t, x="team", y="Transfer Fee", color="Pos.",
                 color_discrete_sequence=['#ff2882', 'rgb(0,0,0)','#963cff','#37003c'],)
+    fig.update_layout(title_text='Transfer fee spend by team and position')
     return fig
 
 def teams_sal():
@@ -76,6 +83,7 @@ def teams_sal():
     df_sup_t=df_sup_t.sort_values('Avg. Salary', ascending=False)
     fig = px.bar(df_sup_t, x="team", y="Avg. Salary", color="Pos.",
                 color_discrete_sequence=['#ff2882', 'rgb(0,0,0)','#963cff','#37003c'])
+    fig.update_layout(title_text='Salary spend by team and position')
     return fig
 
 
@@ -172,7 +180,7 @@ def display_value2(value):
         if (len(value)>0):
             df_sup=df_sup.loc[df_sup['team'].isin(value)]
     fig = px.scatter(df_sup, x="Transfer Fee", y="salary", color="team", size='time',
-                 hover_data=['Player Name'])
+                 hover_data=['Player Name'], title="Relation between transfer fee and salary")
     fig.update_layout(legend=dict(
     orientation="h",
     yanchor="bottom",
@@ -201,8 +209,10 @@ def display_value4(value):
             theta=edades['Age'],
             fill='toself'
             ))
-
-    fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False)
+    fig.update_traces(marker_color='#ff2882',
+                  marker_line_width=1.5, opacity=0.6)
+    fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False,
+                    title_text='Players Age count')
     return fig
 
 @app.callback(Output('display-meanage', 'figure'),
@@ -220,6 +230,9 @@ def display_age_mean(value):
     fig = px.histogram(df_sup, x="Age",
                    marginal="box", # or violin, rug
                    hover_data=df_sup.columns)
+    fig.update_traces(marker_color='#ff2882',
+                  marker_line_width=1.5, opacity=0.6)
+    fig.update_layout(title_text='Players Age Histogram')
     return fig
 
 @app.callback(Output('display-facet', 'figure'),
@@ -237,8 +250,11 @@ def display_facet(value):
             facet_col_wrap=2,
             facet_col_spacing=0.19,
             category_orders={"Pos.": ["GK", "D", "M", "F"]})
+    fig.update_traces(marker_color='#963cff',
+                  marker_line_width=1.5, opacity=0.6)
     fig.update_yaxes(matches=None,showticklabels=True)
-    fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False)
+    fig.update_layout(polar=dict(radialaxis=dict(visible=True),),showlegend=False,
+                        title_text='Player by position makingcomparisson transfer fee')
     return fig
 
 @app.callback(
@@ -249,10 +265,13 @@ def top_slider(value):
     Player_groups=df_sup_t.groupby("Player Name").sum().reset_index()
     Player_groups=Player_groups.sort_values('Avg. Salary', ascending=False)
     fig = px.bar(Player_groups.head(value[0]), x="Player Name", y="Avg. Salary")
+    fig.update_traces(marker_color='#ff2882',
+                  marker_line_width=1.5, opacity=0.6)
+    fig.update_layout(title_text='Top Average salary')
     return fig
 
 
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
